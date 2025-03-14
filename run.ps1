@@ -1,4 +1,4 @@
-﻿chcp 65001 > $null
+chcp 65001 > $null
 
 # Change to the directory where the script is located
 Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
@@ -9,7 +9,7 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   # Download and install Node.js
   $tempInstallerPath = "$env:TEMP\node-v22.14.0-x64.msi"
   Invoke-WebRequest -Uri "https://nodejs.org/dist/v22.14.0/node-v22.14.0-x64.msi" -OutFile $tempInstallerPath
-  Start-Process msiexec.exe -ArgumentList "/i $tempInstallerPath /quiet /norestart" -NoNewWindow -Wait
+  Start-Process msiexec.exe -ArgumentList "/passive /package $tempInstallerPath" -NoNewWindow -Wait
   Remove-Item -Path $tempInstallerPath
   if ($LASTEXITCODE -ne 0) {
     Write-Output "安装 Node.js 失败。正在退出..."
@@ -17,6 +17,9 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     exit 1
   }
 }
+
+# Reload the environment variables to include Node.js
+$env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
 
 # Install dependencies
 Write-Output "正在安装依赖项..."
