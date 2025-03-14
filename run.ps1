@@ -1,4 +1,4 @@
-chcp 65001 > $null
+﻿chcp 65001 > $null
 
 # Change to the directory where the script is located
 Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
