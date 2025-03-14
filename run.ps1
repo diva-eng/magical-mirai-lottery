@@ -7,7 +7,10 @@ Set-Location -Path (Split-Path -Parent $MyInvocation.MyCommand.Definition)
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   Write-Output "未安装 Node.js。正在安装 Node.js..."
   # Download and install Node.js
-  Start-Process msiexec.exe -ArgumentList '/i https://nodejs.org/dist/v22.14.0/node-v22.14.0-x64.msi /quiet /norestart' -NoNewWindow -Wait
+  $tempInstallerPath = "$env:TEMP\node-v22.14.0-x64.msi"
+  Invoke-WebRequest -Uri "https://nodejs.org/dist/v22.14.0/node-v22.14.0-x64.msi" -OutFile $tempInstallerPath
+  Start-Process msiexec.exe -ArgumentList "/i $tempInstallerPath /quiet /norestart" -NoNewWindow -Wait
+  Remove-Item -Path $tempInstallerPath
   if ($LASTEXITCODE -ne 0) {
     Write-Output "安装 Node.js 失败。正在退出..."
     Pause
