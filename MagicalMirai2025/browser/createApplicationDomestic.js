@@ -61,13 +61,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   );
 
   const [first_three, middle_four, last_four] = splitPhoneNumber(lottery.phone);
-  console.log(
-    "Phone Number: ",
-    lottery.phone,
-    first_three,
-    middle_four,
-    last_four
-  );
+  console.log("电话号码: ", lottery.phone, first_three, middle_four, last_four);
   await page.fill(
     "dl.vertical_table:nth-child(6) > dd:nth-child(2) > p:nth-child(3) > input:nth-child(1)",
     first_three
@@ -96,7 +90,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     throw new Error("Postal code is required");
   }
   const [firstPart, secondPart] = lottery.postalCode.split("-");
-  console.log("Postal Code: ", lottery.postalCode, firstPart, secondPart);
+  console.log("邮政编码: ", lottery.postalCode, firstPart, secondPart);
   await page.fill(
     "dl.vertical_table:nth-child(8) > dd:nth-child(2) > p:nth-child(2) > input:nth-child(1)",
     firstPart
@@ -262,7 +256,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   );
 
   console.log(
-    "Lottery Submitted: ",
+    "抽奖已提交: ",
     acpt_no,
     lottery.applicationPassword ? lottery.applicationPassword : password.trim()
   );

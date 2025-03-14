@@ -9,6 +9,10 @@ const {
 
 let browser = null;
 
+const dryRun = process.argv.includes("--dry-run");
+
+console.log("干运行:", dryRun);
+
 async function fill_application(application) {
   browser = await chromium.launch({
     headless: false,
@@ -21,7 +25,7 @@ async function fill_application(application) {
     page,
     application,
     "https://pia.jp/piajp/v/magicalmirai25-1/",
-    true
+    dryRun
   );
   page.close();
   return applicationResult;
@@ -45,9 +49,9 @@ async function fill_applications() {
   // Parse the CSV file to get the applications
   const applications = await processFile();
 
-  console.log("Applications loaded:", applications);
+  console.log("加载的申请:", applications);
   if (!applications || applications.length === 0) {
-    console.log("No applications to fill");
+    console.log("没有要填写的申请");
     return;
   }
 
@@ -65,9 +69,9 @@ async function fill_applications() {
   // Iterate over each application and fill it
   for (const application of applications) {
     const { firstName, lastName, email } = application;
-    console.log(`Filling application for ${lastName} ${firstName}, ${email}`);
+    console.log(`正在填写申请 ${lastName} ${firstName}, ${email}`);
     const result = await fill_application(application);
-    console.log("Result:", result);
+    console.log("结果:", result);
     const { applicationId, applicationPassword, slcd, summary } = result;
     // Append the result to the results.csv file
     const resultFile = fs.createWriteStream(fileName, { flags: "a" });
@@ -76,17 +80,17 @@ async function fill_applications() {
     );
     resultFile.close();
     console.log(
-      `Application filled for ${lastName} ${firstName}, ${email}. Summary: ${summary}`
+      `申请已填写 ${lastName} ${firstName}, ${email}. 摘要: ${summary}`
     );
   }
 }
 
 fill_applications()
   .then(() => {
-    console.log("Applications filled successfully");
+    console.log("申请填写成功");
   })
   .catch((error) => {
-    console.error("Error filling applications:", error);
+    console.error("填写申请时出错:", error);
   })
   .finally(async () => {
     await browser.close();

@@ -18,7 +18,7 @@ const assertCurrentHeading = async (page, expect) => {
     return true;
   }
 
-  throw new Error(`Failed to reach [${expect}] got [${currentHeading}]`);
+  throw new Error(`未能到达 [${expect}]，得到 [${currentHeading}]`);
 };
 
 module.exports = {
