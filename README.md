@@ -89,3 +89,15 @@ firstName,lastName,email,applicationId,applicationPassword,slcd,summary
 ```
 
 请根据需要查看和保存输出文件中的申请信息。
+
+## 免责声明
+
+本工具仅供个人使用，请勿用于任何商业用途。使用本工具所产生的任何后果，开发者不承担任何责任。
+
+## 开源许可
+
+本项目基于 MIT 许可证开源。详细信息请参阅 [LICENSE](./LICENSE) 文件。
+
+## 反对黄牛行为
+
+我们强烈反对任何形式的黄牛行为。请勿使用本工具进行任何违反法律或道德的活动。
