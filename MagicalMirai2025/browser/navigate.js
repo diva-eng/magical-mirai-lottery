@@ -14,6 +14,7 @@ const assertCurrentNavigation = async (page, expect) => {
   if (currentNavigation === expect) {
     return true;
   }
+  await page.screenshot({ path: `导航未能到达 [${expect}].png` });
   throw new Error(`未能到达 [${expect}]，当前为 [${currentNavigation}]`);
 };
 

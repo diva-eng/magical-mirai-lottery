@@ -6,6 +6,8 @@
 
 ## 运行工具
 
+### Windows
+
 1. 确保您已经安装了 Node.js。如果未安装，`run.bat` 会自动下载并安装 Node.js。
 2. 双击或运行 `run.bat` 文件。该脚本将执行以下操作：
 
@@ -25,21 +27,81 @@
 - 选择 `2` 将以提交模式运行脚本（会提交申请）。
 - 选择 `3` 将退出脚本。
 
-5. 确认继续操作时，请确保您已在 `applications.csv` 文件中修改并添加所有申请条目。
+5. 确认继续操作时，请确保您已在 `applications.json` 文件中修改并添加所有申请条目。
+
+### Mac/Linux
+
+1. 下载并安装 Node.js 的 `.pkg` 文件（适用于 Mac）或使用包管理器安装 Node.js（适用于 Linux）。您可以从 [Node.js 官方网站](https://nodejs.org/dist/v22.14.0/node-v22.14.0.pkg) 下载并安装适用于 Mac 的 `.pkg` 文件。
+2. 打开终端并导航到项目目录。
+3. 运行以下命令以安装依赖项并运行脚本：
+
+```bash
+# 切换到脚本所在目录
+cd /path/to/magical-mirai-lottery
+
+# 安装项目依赖项
+npm install
+
+# 安装 Playwright 及其浏览器依赖项
+npm install playwright
+npx playwright install
+
+# 运行 index.js 脚本
+node index.js --dry-run  # 测试模式
+# 或者
+node index.js  # 提交模式
+```
+
+4. 运行脚本后，您将看到以下菜单选项：
+
+- 1. 以测试模式运行脚本
+- 2. 以提交模式运行脚本
+- 3. 退出
+
+5. 选择相应的选项并按回车键：
+
+- 选择 `1` 将以测试模式运行脚本（不会提交申请）。
+- 选择 `2` 将以提交模式运行脚本（会提交申请）。
+- 选择 `3` 将退出脚本。
+
+6. 确认继续操作时，请确保您已在 `applications.json` 文件中修改并添加所有申请条目。
 
 **注意！在选择提交模式后，系统将提示您输入最后确认码。请手动输入确认码以继续操作。注意：确认码需要您自行识别，本脚本不提供自动识别功能。提交模式最后要记得观察打开的浏览器，等待最后一步要输入确认码。**
 
-## 编辑 `applications.csv`
+## 编辑 `applications.json`
 
-`applications.csv` 文件包含所有申请条目。请按照以下格式编辑文件：
+`applications.json` 文件包含所有申请条目。请按照以下格式编辑文件：
 
-```plaintext
-applicationPassword,firstName,firstNameKana,lastName,lastNameKana,email,phone,gender,birthDate,postalCode,showNo,peerName,peerPhone,piaEmail,piaPassword,paymentType,creditCardNo,creditCardMonth,creditCardYear,creditCardCVV
+```json
+[
+  {
+    "applicationPassword": "393939",
+    "firstName": "ＴＥＳＴ",
+    "firstNameKana": "テスト",
+    "lastName": "ＵＳＥＲ",
+    "lastNameKana": "ユーザー",
+    "email": "ticket8@test.cx",
+    "phone": "08012345678",
+    "gender": "female",
+    "birthDate": "2007-08-31",
+    "postalCode": "981-0935",
+    "showNo": "17",
+    "peerName": "アナザーユーザー",
+    "peerPhone": "08012345678",
+    "piaEmail": "test@test.com",
+    "piaPassword": "tesepass",
+    "paymentType": "creditCard",
+    "creditCardNo": "4580337641600933",
+    "creditCardMonth": "11",
+    "creditCardYear": "2027",
+    "creditCardCVV": "151"
+  }
+]
 ```
 
 ### 列说明
 
-- `applicationPassword`: 申请密码 （6位数字）
+- `applicationPassword`: 申请密码 （6 位数字）
 - `firstName`: 名字 （全角英文）
 - `firstNameKana`: 名字的假名
 - `lastName`: 姓氏 （全角英文）
@@ -62,13 +124,34 @@ applicationPassword,firstName,firstNameKana,lastName,lastNameKana,email,phone,ge
 
 ### 示例条目
 
-```plaintext
-393939,太郎,タロウ,山田,ヤマダ,example@example.com,09012345678,男,1990-01-01,1234567,1,花子,09087654321,pia@example.com,piaPassword,creditCard,1234567812345678,12,2025,123
+```json
+{
+  "applicationPassword": "393939",
+  "firstName": "太郎",
+  "firstNameKana": "タロウ",
+  "lastName": "山田",
+  "lastNameKana": "ヤマダ",
+  "email": "example@example.com",
+  "phone": "09012345678",
+  "gender": "male",
+  "birthDate": "1990-01-01",
+  "postalCode": "123-4567",
+  "showNo": "1",
+  "peerName": "花子",
+  "peerPhone": "09087654321",
+  "piaEmail": "pia@example.com",
+  "piaPassword": "piaPassword",
+  "paymentType": "creditCard",
+  "creditCardNo": "1234567812345678",
+  "creditCardMonth": "12",
+  "creditCardYear": "2025",
+  "creditCardCVV": "123"
+}
 ```
 
 ## 输出申请信息
 
-运行脚本后，生成的申请信息将保存在 `results-YYYY-MM-DDTHH-MM-SS.sssZ.csv` 文件中。文件名中的时间戳表示生成文件的时间。
+运行脚本后，生成的申请信息将保存在 `results-2025-03-15T04-07-21.593Z/result.csv` 文件中。文件名中的时间戳表示生成文件的时间。
 
 ### 输出文件格式
 
@@ -95,6 +178,21 @@ firstName,lastName,email,applicationId,applicationPassword,slcd,summary
 ```
 
 请根据需要查看和保存输出文件中的申请信息。
+
+## 结果截图
+
+运行脚本后，生成的截图将保存在 `results-2025-03-15T04-07-21.593Z/` 文件夹中。文件名中的时间戳表示生成文件的时间。
+
+### 截图文件
+
+- `第一页.png`: 包含填写完第一页表单后的截图。
+- `第二页.png`: 包含填写完第二页表单后的截图。
+- `第三页.png`: 包含填写完第三页表单后的截图。
+- `支付信息.png`: 包含填写支付信息后的截图。
+- `Pia登录.png`: 包含登录 Pia 账户后的截图。
+- `抽奖完成.png`: 包含抽奖完成后的截图。
+
+请根据需要查看和保存输出文件夹中的截图。
 
 ## 合作条例
 

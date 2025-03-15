@@ -17,7 +17,7 @@ const assertCurrentHeading = async (page, expect) => {
   if (currentHeading === expect) {
     return true;
   }
-
+  await page.screenshot({ path: `标题未能到达 [${expect}].png` });
   throw new Error(`未能到达 [${expect}]，得到 [${currentHeading}]`);
 };
 

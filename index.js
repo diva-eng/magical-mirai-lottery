@@ -1,8 +1,8 @@
 process.env.PLAYWRIGHT_BROWSERS_PATH = 0;
 
-const { parse } = require("csv-parse");
 const fs = require("fs");
 const { chromium } = require("playwright");
+const applications = require("./applications.json");
 const {
   completeDomesticLottery,
 } = require("./MagicalMirai2025/browser/createApplicationDomestic");
@@ -21,43 +21,34 @@ async function fill_application(application) {
     args: ["--ignore-certificate-errors"],
   });
   const page = await browser.newPage();
+
   const applicationResult = await completeDomesticLottery(
     page,
     application,
     "https://pia.jp/piajp/v/magicalmirai25-1/",
     dryRun
   );
+  await page.screenshot({ path: "关闭页面前.png" });
   page.close();
   return applicationResult;
 }
 
-const processFile = async () => {
-  records = [];
-  const parser = fs.createReadStream(`${__dirname}/applications.csv`).pipe(
-    parse({
-      columns: true,
-      skip_empty_lines: true,
-    })
-  );
-  for await (const record of parser) {
-    records.push(record);
-  }
-  return records;
-};
-
 async function fill_applications() {
-  // Parse the CSV file to get the applications
-  const applications = await processFile();
-
   console.log("加载的申请:", applications);
   if (!applications || applications.length === 0) {
     console.log("没有要填写的申请");
     return;
   }
 
-  // Create a unique file name for the results
-  const timestamp = new Date().toISOString().replace(/:/g, "-");
-  const fileName = `results-${timestamp}.csv`;
+  // Create a unique directory for this run
+  const dirName = `results-${new Date().toISOString().replace(/:/g, "-")}`;
+  if (!fs.existsSync(dirName)) {
+    fs.mkdirSync(dirName);
+  }
+  process.chdir(dirName);
+  console.log("当前目录:", process.cwd());
+
+  const fileName = `results.csv`;
 
   // Create a new file to store the results, write and close the file
   const resultFile = fs.createWriteStream(fileName);

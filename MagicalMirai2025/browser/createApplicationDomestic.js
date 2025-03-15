@@ -123,6 +123,8 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   }
   await delay(chance.integer({ min: 1000, max: chance.pickone([2000, 5000]) }));
 
+  await page.screenshot({ path: "第一页.png" });
+
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
@@ -150,6 +152,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   );
 
   await delay(1000);
+  await page.screenshot({ path: "第二页.png" });
   await page.click(
     "#wrap > form > section:nth-child(3) > div:nth-child(2) > input.next"
   );
@@ -193,6 +196,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   }
 
   await delay(chance.integer({ min: 1000, max: chance.pickone([2000, 4000]) }));
+  await page.screenshot({ path: "第三页.png" });
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
@@ -211,9 +215,13 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     throw new Error("Pia email and password are required");
   }
 
+  await page.screenshot({ path: "支付信息.png" });
+
   await page.click(".next");
 
   await delay(chance.integer({ min: 1000, max: chance.pickone([2000, 5000]) }));
+
+  await page.screenshot({ path: "Pia登录.png" });
 
   let lottery_summary = "";
 
@@ -224,6 +232,8 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     await delay(1000);
     currentNavigation = await getCurrentNavigation(page);
   }
+
+  await page.screenshot({ path: "抽奖完成.png" });
 
   const acpt_no = await page
     .locator(
