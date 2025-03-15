@@ -51,9 +51,23 @@ node index.js --dry-run  # 测试模式
 # 或者
 node index.js  # 提交模式
 ```
+
 4. 确认继续操作时，请确保您已在 `applications.json` 文件中修改并添加所有申请条目。
 
 **注意！在选择提交模式后，系统将提示您输入最后确认码。请手动输入确认码以继续操作。注意：确认码需要您自行识别，本脚本不提供自动识别功能。提交模式最后要记得观察打开的浏览器，等待最后一步要输入确认码。**
+
+## 生成 `applications.json`
+
+您可以使用 `application_gen.bat` 工具生成 `applications.json` 文件。该工具将引导您输入必要的信息并生成符合格式的 `applications.json` 文件。
+
+### 使用步骤
+
+1. 双击或运行 `application_gen.bat` 文件。该脚本将执行以下操作：
+
+- 运行 `application_gen.js` 脚本。
+- 引导您输入申请所需的所有信息。
+
+2. 按照提示输入信息，完成后将生成 `applications.json` 文件。
 
 ## 编辑 `applications.json`
 

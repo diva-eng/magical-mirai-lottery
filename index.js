@@ -1,6 +1,7 @@
 process.env.PLAYWRIGHT_BROWSERS_PATH = 0;
 
 const fs = require("fs");
+const util = require("util");
 const { chromium } = require("playwright");
 const applications = require("./applications.json");
 const {
@@ -10,6 +11,20 @@ const {
 let browser = null;
 
 const dryRun = process.argv.includes("--dry-run");
+
+const logFile = fs.createWriteStream("application.log", { flags: "a" });
+const logStdout = process.stdout;
+
+console.log = function () {
+  logFile.write(
+    new Date().toISOString() + " - " + util.format.apply(null, arguments) + "\n"
+  );
+  logStdout.write(
+    new Date().toISOString() + " - " + util.format.apply(null, arguments) + "\n"
+  );
+};
+
+console.error = console.log;
 
 console.log("干运行:", dryRun);
 

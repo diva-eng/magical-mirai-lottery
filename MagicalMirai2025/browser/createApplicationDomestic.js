@@ -84,7 +84,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     lottery.email.trim()
   );
 
-  await delay(1000);
+  await delay(2000);
 
   if (!lottery.postalCode) {
     throw new Error("Postal code is required");
@@ -100,7 +100,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     secondPart
   );
   await page.click("#zip_search");
-  await delay(1000);
+  await delay(2000);
   await page.fill(
     "dl.vertical_table:nth-child(9) > dd:nth-child(5) > p:nth-child(2) > input:nth-child(1)",
     "番地なし"
@@ -129,7 +129,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
 
-  await delay(1000);
+  await delay(2000);
   await assertCurrentHeading(page, "第1希望");
   await selectShow(page, lottery.showNo);
   await page.click(
@@ -142,7 +142,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
 
-  await delay(1000);
+  await delay(2000);
   await page.selectOption(
     "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
     { value: "2" }
@@ -151,13 +151,13 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
 
-  await delay(1000);
+  await delay(2000);
   await page.screenshot({ path: "第二页.png" });
   await page.click(
     "#wrap > form > section:nth-child(3) > div:nth-child(2) > input.next"
   );
 
-  await delay(1000);
+  await delay(2000);
   await delay(chance.integer({ min: 1000, max: chance.pickone([2000, 5000]) }));
 
   if (lottery.paymentType == "711") {
@@ -206,7 +206,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
       "dl.floralwhite_back:nth-child(1) > dd:nth-child(2) > p:nth-child(1) > input:nth-child(1)"
     );
     await page.keyboard.type(lottery.piaEmail.trim());
-    await delay(1000);
+    await delay(2000);
     await page.fill(
       "dl.floralwhite_back:nth-child(2) > dd:nth-child(2) > p:nth-child(1) > input:nth-child(1)",
       lottery.piaPassword
@@ -229,7 +229,7 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
 
   let currentNavigation = await getCurrentNavigation(page);
   while (currentNavigation !== "申込完了") {
-    await delay(1000);
+    await delay(2000);
     currentNavigation = await getCurrentNavigation(page);
   }
 
