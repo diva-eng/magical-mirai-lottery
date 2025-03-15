@@ -39,22 +39,22 @@ applicationPassword,firstName,firstNameKana,lastName,lastNameKana,email,phone,ge
 
 ### 列说明
 
-- `applicationPassword`: 申请密码
-- `firstName`: 名字
+- `applicationPassword`: 申请密码 （6位数字）
+- `firstName`: 名字 （全角英文）
 - `firstNameKana`: 名字的假名
-- `lastName`: 姓氏
+- `lastName`: 姓氏 （全角英文）
 - `lastNameKana`: 姓氏的假名
 - `email`: 电子邮件地址
 - `phone`: 电话号码
 - `gender`: 性别
 - `birthDate`: 出生日期 (格式: YYYY-MM-DD)
-- `postalCode`: 邮政编码
-- `showNo`: 演出编号
-- `peerName`: 同行者名字
+- `postalCode`: 邮政编码 （格式：NNN-NNNN）需要是有效的日本邮政编码
+- `showNo`: 演出编号 （1-17， 按照官网申请表顺序）
+- `peerName`: 同行者名字 （片假名日文）
 - `peerPhone`: 同行者电话
 - `piaEmail`: Pia 账户电子邮件
 - `piaPassword`: Pia 账户密码
-- `paymentType`: 支付类型 (例如: creditCard)
+- `paymentType`: 支付类型 (例如: creditCard，711)
 - `creditCardNo`: 信用卡号码
 - `creditCardMonth`: 信用卡有效期月份 (格式: MM)
 - `creditCardYear`: 信用卡有效期年份 (格式: YYYY)
