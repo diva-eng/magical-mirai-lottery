@@ -55,10 +55,10 @@ applicationPassword,firstName,firstNameKana,lastName,lastNameKana,email,phone,ge
 - `piaEmail`: Pia 账户电子邮件
 - `piaPassword`: Pia 账户密码
 - `paymentType`: 支付类型 (例如: creditCard，711)
-- `creditCardNo`: 信用卡号码
-- `creditCardMonth`: 信用卡有效期月份 (格式: MM)
-- `creditCardYear`: 信用卡有效期年份 (格式: YYYY)
-- `creditCardCVV`: 信用卡 CVV 码
+- `creditCardNo`: 信用卡号码 （信用卡支付类型必填）
+- `creditCardMonth`: 信用卡有效期月份 (格式: MM)（信用卡支付类型必填）
+- `creditCardYear`: 信用卡有效期年份 (格式: YYYY)（信用卡支付类型必填）
+- `creditCardCVV`: 信用卡 CVV 码（信用卡支付类型必填）
 
 ### 示例条目
 
