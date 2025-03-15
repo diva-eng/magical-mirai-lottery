@@ -241,8 +241,6 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
     )
     .innerText();
 
-  const captcha_status = captcha_solve_tries + "," + captcha_submit_tries;
-
   const summary_1 = await page
     .locator("#wrap > section:nth-child(6)")
     .innerText();
@@ -254,9 +252,6 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   lottery_summary = trimSummary(
     "Accepted: " +
       acpt_no +
-      "\nCaptchaRun: " +
-      captcha_status +
-      "" +
       "\n" +
       lottery_summary +
       "\n" +
