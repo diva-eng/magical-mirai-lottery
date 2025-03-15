@@ -7,25 +7,25 @@ const rl = readline.createInterface({
 });
 
 const questions = [
-  "applicationPassword: ",
-  "firstName: ",
-  "firstNameKana: ",
   "lastName: ",
   "lastNameKana: ",
-  "email: ",
-  "phone: ",
+  "firstName: ",
+  "firstNameKana: ",
   "gender: ",
   "birthDate: ",
+  "phone: ",
+  "email: ",
   "postalCode: ",
+  "applicationPassword: ",
   "peerName: ",
   "peerPhone: ",
-  "piaEmail: ",
-  "piaPassword: ",
   "paymentType: ",
   "creditCardNo: ",
   "creditCardMonth: ",
   "creditCardYear: ",
   "creditCardCVV: ",
+  "piaEmail: ",
+  "piaPassword: ",
 ];
 
 const shows = [
