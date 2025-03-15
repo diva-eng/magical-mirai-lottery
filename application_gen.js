@@ -79,10 +79,19 @@ function askQuestion(index) {
   if (index < questions.length) {
     const question = questions[index];
     const translatedQuestion = translations[question] || question;
-    rl.question(translatedQuestion, (answer) => {
-      application[question.slice(0, -2)] = answer;
+
+    // Skip credit card questions if payment type is 711
+    if (
+      application.paymentType === "711" &&
+      question.startsWith("creditCard")
+    ) {
       askQuestion(index + 1);
-    });
+    } else {
+      rl.question(translatedQuestion, (answer) => {
+        application[question.slice(0, -2)] = answer;
+        askQuestion(index + 1);
+      });
+    }
   } else {
     rl.question("您将申请哪个演出？（1, all, custom）：", (answer) => {
       if (answer === "1") {
