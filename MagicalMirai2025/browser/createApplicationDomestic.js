@@ -143,10 +143,17 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   );
 
   await delay(2000);
-  await page.selectOption(
-    "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
-    { value: "2" }
-  );
+  if (lottery.peerName && lottery.peerPhone) {
+    await page.selectOption(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
+      { value: "2" }
+    );
+  } else {
+    await page.selectOption(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
+      { value: "1" }
+    );
+  }
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
@@ -229,7 +236,8 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
 
   let currentNavigation = await getCurrentNavigation(page);
   while (currentNavigation !== "申込完了") {
-    await delay(2000);
+    await delay(5000);
+    console.log("请在页面输入验证码");
     currentNavigation = await getCurrentNavigation(page);
   }
 
