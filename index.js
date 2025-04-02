@@ -15,12 +15,50 @@ const {
 
 let browser = null;
 
+// Load proxies.txt file and parse it into an array of objects
+const proxies = fs
+  .readFileSync("proxies.txt", "utf-8")
+  .split("\n")
+  .map((line) => line.trim());
+
+async function getRandomProxy() {
+  // Get random proxy from array and test using playwright
+  while (true) {
+    const randomIndex = Math.floor(Math.random() * proxies.length);
+    const proxy = proxies[randomIndex].trim();
+    if (!proxy) continue; // Skip empty lines
+    console.log("Testing proxy:", proxy);
+    const browser = await chromium.launch({
+      headless: true,
+      args: [`--proxy-server=${proxy}`],
+    });
+    const page = await browser.newPage();
+    try {
+      await page.goto("https://httpbin.org/ip", {
+        waitUntil: "domcontentloaded",
+      });
+      const content = await page.content();
+      if (content.includes("origin")) {
+        console.log("Proxy is working:", proxy);
+        return proxy;
+      } else {
+        console.log("Proxy failed:", proxy);
+      }
+    } catch (error) {
+      console.error("Error testing proxy:", error);
+    } finally {
+      await browser.close();
+    }
+  }
+}
+
 // process node index.js --dry-run --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
 program
   .name("magical-mirai-lottery")
   .version("0.0.1")
   .description("Fill out lottery applications")
   .option("-d, --dry-run", "Perform a dry run without actual submission")
+  .option("--use-proxy", "Use a random proxy from proxies.txt")
   .option("-t, --type <type>", "Type of lottery")
   .option("-u, --url <url>", "URL of the lottery");
 
@@ -29,7 +67,7 @@ console.log("命令行参数:", process.argv);
 console.log("命令行参数:", program.opts());
 
 const options = program.opts();
-const { dryRun, type, url } = options;
+const { dryRun, type, url, useProxy } = options;
 
 // url and type is required
 if (!type || !url) {
@@ -51,6 +89,7 @@ if (!["domestic", "overseas"].includes(type)) {
 console.log("抽奖类型:", type);
 console.log("抽奖网址:", url);
 console.log("干运行:", dryRun);
+console.log("使用代理:", useProxy);
 console.log("当前目录:", process.cwd());
 console.log("当前时间:", new Date().toISOString());
 
@@ -68,10 +107,15 @@ console.log = function () {
 
 console.error = console.log;
 
-async function fill_application(application, lottery_type, lottery_url) {
+async function fill_application(application, lottery_type, lottery_url, proxy) {
   browser = await chromium.launch({
     headless: false,
     executablePath: "",
+    proxy: proxy
+      ? {
+          server: proxy,
+        }
+      : null,
     ignoreDefaultArgs: ["--mute-audio"],
     args: ["--ignore-certificate-errors"],
   });
@@ -108,6 +152,19 @@ async function fill_applications(lottery_type, lottery_url) {
     return;
   }
 
+  // If useProxy is true, get a random proxy list equal to the number of applications
+  let proxyList = [];
+  if (useProxy) {
+    proxyList = await Promise.all(
+      applications.map(async () => {
+        const proxy = await getRandomProxy();
+        return proxy;
+      })
+    );
+  }
+
+  console.log("代理列表:", proxyList);
+
   // Create a unique directory for this run
   const dirName = `results-${new Date().toISOString().replace(/:/g, "-")}`;
   if (!fs.existsSync(dirName)) {
@@ -132,7 +189,8 @@ async function fill_applications(lottery_type, lottery_url) {
     const result = await fill_application(
       application,
       lottery_type,
-      lottery_url
+      lottery_url,
+      useProxy ? proxyList[applications.indexOf(application)] : null
     );
     console.log("结果:", result);
     const { applicationId, applicationPassword, slcd, summary } = result;

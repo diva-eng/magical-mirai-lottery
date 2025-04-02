@@ -51,10 +51,10 @@ if ($LASTEXITCODE -ne 0) {
 
 # List of lottery urls and their corresponding names and dates
 $lotteryUrls = @(
-  @{ Name = "オフィシャルWEB抽選先行（一次受付）"; Url = "https://pia.jp/v/magicalmirai25-1/"; Date = "2025年3月14日(金) 12:00 ～ 3月31日(月) 23:59"; Type = "domestic" },
-  @{ Name = "オフィシャルWEB抽選先行（二次受付）"; Url = "https://pia.jp/v/magicalmirai25-2/"; Date = "2025年4月18日(金) 12:00 ～ 5月12日(月) 23:59" ; Type = "domestic"},
-  @{ Name = "Advance lottery reservation from website"; Url = "https://pia.jp/v/magicalmirai25-1en/"; Date = "April 18th (Fri.) 2025, 12:00 JST - May 12th (Mon.) 2025, 23:59 JST" ; Type = "overseas"},
-  @{ Name = "Advance lottery reservation from website"; Url = "https://pia.jp/v/magicalmirai25-2en/"; Date = "May 16th (Fri.) 2025, 12:00 JST - June 2nd (Mon.) 2025, 23:59 JST"; Type = "overseas" }
+  @{ Name = "オフィシャルWEB抽選先行（一次受付）"; Url = "http://pia.jp/v/magicalmirai25-1/"; Date = "2025年3月14日(金) 12:00 ～ 3月31日(月) 23:59"; Type = "domestic" },
+  @{ Name = "オフィシャルWEB抽選先行（二次受付）"; Url = "http://pia.jp/v/magicalmirai25-2/"; Date = "2025年4月18日(金) 12:00 ～ 5月12日(月) 23:59" ; Type = "domestic"},
+  @{ Name = "Advance lottery reservation from website"; Url = "http://pia.jp/v/magicalmirai25-1en/"; Date = "April 18th (Fri.) 2025, 12:00 JST - May 12th (Mon.) 2025, 23:59 JST" ; Type = "overseas"},
+  @{ Name = "Advance lottery reservation from website"; Url = "http://pia.jp/v/magicalmirai25-2en/"; Date = "May 16th (Fri.) 2025, 12:00 JST - June 2nd (Mon.) 2025, 23:59 JST"; Type = "overseas" }
 )
 
 Write-Output "==============================="
@@ -102,6 +102,17 @@ do {
 
 Write-Host "已选择: $($selectedLottery.Name)"
 
+# Ask if the user wants to use a random proxy
+Write-Host "是否使用随机代理? (y/n)"
+$useProxy = Read-Host "输入你的选择"
+if ($useProxy -match "^[yY]$") {
+  Write-Output "已选择使用随机代理。"
+  $proxyEnabled = $true
+} else {
+  Write-Output "未选择使用随机代理。"
+  $proxyEnabled = $false
+}
+
 # Execute index.js using Node.js
 Write-Output "请确保已在 applications.json 中修改并添加所有申请条目。"
 $confirm = Read-Host "确认继续? (y/n)"
@@ -111,7 +122,15 @@ if ($confirm -notmatch "^[yY]$") {
 }
 Write-Output "正在运行 index.js..."
 if ($mode -eq "dryrun") {
-  node index.js --dry-run --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
+  if ($proxyEnabled) {
+    node index.js --dry-run --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)" --use-proxy
+  } else {
+    node index.js --dry-run --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
+  }
 } else {
-  node index.js --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
+  if ($proxyEnabled) {
+    node index.js --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)" --use-proxy
+  } else {
+    node index.js --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
+  }
 }

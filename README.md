@@ -27,7 +27,14 @@
 - 选择 `2` 将以提交模式运行脚本（会提交申请）。
 - 选择 `3` 将退出脚本。
 
-5. 确认继续操作时，请确保您已在 `applications.json` 文件中修改并添加所有申请条目。
+5. 接下来，您将看到一个抽选项目列表，选择一个项目并按回车键：
+
+6. 系统会询问是否使用随机代理：
+
+- 输入 `y` 或 `Y` 表示使用随机代理（代理列表来源于 `proxies.txt` 文件）。
+- 输入 `n` 或 `N` 表示不使用代理。
+
+**注意：如果选择使用代理，系统将在开始之前测试代理的可用性，这可能需要较长时间。**
 
 ### Mac/Linux
 
@@ -47,12 +54,18 @@ npm install playwright
 npx playwright install
 
 # 运行 index.js 脚本
-node index.js --dry-run  # 测试模式
+node index.js --dry-run --type domestic --url http://example.com  # 测试模式
 # 或者
-node index.js  # 提交模式
+node index.js --type domestic --url http://example.com  # 提交模式
 ```
 
-4. 确认继续操作时，请确保您已在 `applications.json` 文件中修改并添加所有申请条目。
+4. 如果需要使用代理，请在运行脚本时添加 `--use-proxy` 参数：
+
+```bash
+node index.js --dry-run --type domestic --url http://example.com --use-proxy
+```
+
+5. 确认继续操作时，请确保您已在 `applications.json` 文件中修改并添加所有申请条目。
 
 **注意！在选择提交模式后，系统将提示您输入最后确认码。请手动输入确认码以继续操作。注意：确认码需要您自行识别，本脚本不提供自动识别功能。提交模式最后要记得观察打开的浏览器，等待最后一步要输入确认码。**
 
@@ -194,6 +207,39 @@ firstName,lastName,email,applicationId,applicationPassword,slcd,summary
 - `抽奖完成.png`: 包含抽奖完成后的截图。
 
 请根据需要查看和保存输出文件夹中的截图。
+
+## 关于代理的使用
+
+本工具支持通过代理服务器进行网络请求，以提高匿名性或绕过网络限制。代理列表存储在 `proxies.txt` 文件中，支持以下格式：
+
+- HTTP 代理：`http://<IP>:<端口>`
+- SOCKS4 代理：`socks4://<IP>:<端口>`
+- SOCKS5 代理：`socks5://<IP>:<端口>`
+
+### 配置代理
+
+1. 打开 `proxies.txt` 文件。
+2. 按行添加代理地址，每行一个代理。例如：
+
+```plaintext
+http://192.168.1.1:8080
+socks4://192.168.1.2:1080
+socks5://192.168.1.3:1080
+```
+
+3. 保存文件。
+
+### 使用代理
+
+运行脚本时，添加 `--use-proxy` 参数以启用代理功能。例如：
+
+```bash
+node index.js --dry-run --type domestic --url http://example.com --use-proxy
+```
+
+系统会随机从 `proxies.txt` 文件中选择一个代理，并在运行过程中测试其可用性。如果代理不可用，系统将自动尝试下一个代理。
+
+**注意：请确保代理列表中的代理是有效的，并避免使用公共代理以减少被封禁的风险。**
 
 ## 合作条例
 
