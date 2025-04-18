@@ -115,7 +115,7 @@ async function fill_application(application, lottery_type, lottery_url, proxy) {
       ? {
           server: proxy,
         }
-      : null,
+      : undefined,
     ignoreDefaultArgs: ["--mute-audio"],
     args: ["--ignore-certificate-errors"],
   });

@@ -8,11 +8,11 @@ const {
 } = require("../utils");
 const { selectShow, selectSSSeat } = require("./action");
 const { getSlcd } = require("./element");
-const { assertCurrentHeading } = require("./heading");
+const { assertCurrentHeading, getCurrentHeading } = require("./heading");
 const { assertCurrentNavigation, getCurrentNavigation } = require("./navigate");
 
 const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
-  const password = chance().string({ length: 6, alpha: false, numeric: true });
+  const password = chance.string({ length: 6, alpha: false, numeric: true });
   await page.goto(link);
   const slcd = await getSlcd(page);
   await page.click("#wrap > form > section > div > input");
@@ -94,40 +94,15 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
     password.trim()
   );
 
-  // fill peer information
-  if (lottery.peerName && lottery.peerPhone) {
-    const peerNameSplit = lottery.peerName.split(" ");
-    const peerFirstName = peerNameSplit[0].trim();
-    const peerLastName = peerNameSplit[1].trim();
-    await page.fill(
-      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(9) > dd > p:nth-child(2) > input[type=text]:nth-child(1)",
-      peerFirstName
-    );
-    await page.fill(
-      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(9) > dd > p:nth-child(2) > input[type=text]:nth-child(2)",
-      peerLastName
-    );
-    //peer phone
-    const peerPhoneFull = truncatePhoneNumber(lottery.peerPhone, 11);
-    await page.fill(
-      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(9) > dd > p:nth-child(4) > input[type=text]",
-      peerPhoneFull
-    );
-  }
-  await delay(
-    chance().integer({
-      min: 1000,
-      max: chance().pickone([2000, 10000]),
-    })
-  );
+  await page.screenshot({ path: "第一页.png" });
 
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
 
   //SHOW
-  await delay(10000);
-  await assertCurrentHeading(page, "Priority 1");
+  await delay(1000);
+  await assertCurrentHeading(page, "Choice 1");
   await selectShow(page, lottery.showNo); // 1 based
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
@@ -136,16 +111,51 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
   //SEAT
   await delay(2000);
   await selectSSSeat(page);
+  await page.screenshot({ path: "第二页.png" });
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
 
   //COUNT
   await delay(2000);
-  await page.selectOption(
-    "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
-    { value: "2" }
+
+  // fill peer information
+  if (lottery.peerName && lottery.peerPhone) {
+    await page.selectOption(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
+      { value: "2" }
+    );
+    const peerNameSplit = lottery.peerName.split(" ");
+    const peerFirstName = peerNameSplit[0].trim();
+    const peerLastName = peerNameSplit[1].trim();
+    await page.fill(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl.vertical_table.white_back.line_top > dd:nth-child(3) > p:nth-child(2) > input[type=text]:nth-child(1)",
+      peerFirstName
+    );
+    await page.fill(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl.vertical_table.white_back.line_top > dd:nth-child(3) > p:nth-child(2) > input[type=text]:nth-child(2)",
+      peerLastName
+    );
+    //peer phone
+    const peerPhoneFull = truncatePhoneNumber(lottery.peerPhone, 11);
+    await page.fill(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl.vertical_table.white_back.line_top > dd:nth-child(3) > p:nth-child(5) > input[type=text]",
+      peerPhoneFull
+    );
+  } else {
+    await page.selectOption(
+      "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl > dd:nth-child(3) > p > select",
+      { value: "1" }
+    );
+  }
+
+  await delay(
+    chance.integer({
+      min: 1000,
+      max: chance.pickone([2000, 10000]),
+    })
   );
+  await page.screenshot({ path: "第三页.png" });
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
@@ -153,15 +163,15 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
   //CONFIRM
   await delay(2000);
   await page.click(
-    "#wrap > form > section:nth-child(3) > div:nth-child(2) > input.next"
+    "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
 
   //payment
   await delay(2000);
   await delay(
-    chance().integer({
+    chance.integer({
       min: 1000,
-      max: chance().pickone([2000, 5000]),
+      max: chance.pickone([2000, 5000]),
     })
   );
   await page.fill(
@@ -185,11 +195,12 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
     lottery.creditCardCVV.trim()
   );
   await delay(
-    chance().integer({
+    chance.integer({
       min: 1000,
-      max: chance().pickone([2000, 8000]),
+      max: chance.pickone([2000, 8000]),
     })
   );
+  await page.screenshot({ path: "支付信息.png" });
   await page.click(
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
@@ -211,43 +222,24 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
     "#wrap > form > section:nth-child(2) > div:nth-child(2) > input.next"
   );
   await delay(
-    chance().integer({
+    chance.integer({
       min: 1000,
-      max: chance().pickone([2000, 10000]),
+      max: chance.pickone([2000, 10000]),
     })
   );
 
-  const captchaResult = await solveCaptchaAndSubmit(page, dryRun);
+  let lottery_summary = "";
 
-  const { captcha_passed, captcha_solve_tries, captcha_submit_tries } =
-    captchaResult;
-  let { lottery_summary } = captchaResult;
+  await delay(2000);
 
-  if (dryRun) {
-    return {
-      id: lottery.id.toString(),
-      slcd,
-      applicationId: `DRYRUN_${chance().integer({ min: 99999999 })}_DRYRUN`,
-      applicationPassword: `DRYRUN_${chance().integer({
-        min: 99999999,
-      })}_DRYRUN`,
-      summary: trimSummary(
-        "Oversea Accepted: 2495478939\nCaptchaRun: 1,1\n● Name: Siyuan Gao\n● Gender: Male\n● Birthday: 1993/02/21\n● Telephone Number: 604-880-8496\n● Email Address: ▼ An application completion email/a result notification email will be sent to this email address. Please make sure to input your email address correctly.\t\t\t\t\t\t*Please register an email address correctly and configure the setting to allow emails from @pia.co.jp to be received.\t\t\t\t\t\tsiyuan@owo.ac\n● Nationality: Canada\n● Your companion(s) Information: ▼ Name\t\t\t\t\t\tSuki Jiang\t\t\t\t\t\t▼ Telephone Number\t\t\t\t\t\t9175132345\n● Priority 1: Sun, Aug 18/2024 16:30 【Night Show】 Fukuoka Sunpalace\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tSS seat(＋exh tix) - 10,500JPY x 2 = 21,000JPY\n"
-      ),
-    };
+  let currentNavigation = await getCurrentNavigation(page);
+  while (currentNavigation !== "Completion of Application") {
+    await delay(5000);
+    console.log("请在页面输入验证码");
+    currentNavigation = await getCurrentNavigation(page);
   }
 
-  if (!captcha_passed) {
-    throw new Error("Failed to solve captcha");
-  }
-
-  await delay(5000);
-  const currentNavigation = await getCurrentNavigation(page);
-  if (currentNavigation !== "Completion of Application") {
-    throw new Error(
-      "Unable to submit application, check credit card information"
-    );
-  }
+  await page.screenshot({ path: "抽奖完成.png" });
 
   const acpt_no = await page
     .locator(
@@ -255,24 +247,41 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
     )
     .innerText();
 
-  const captcha_status = captcha_solve_tries + "," + captcha_submit_tries;
+  const summary_1 = await page
+    .locator(
+      "#wrap > section:nth-child(5) > div > div.contents_body.lightpink_back"
+    )
+    .innerText();
+
+  const summary_2 = await page
+    .locator(
+      "#wrap > section:nth-child(6) > div > div.contents_body.lightblue_back"
+    )
+    .innerText();
 
   lottery_summary = trimSummary(
-    "Oversea Accepted: " +
+    "Accepted: " +
       acpt_no +
-      "\nCaptchaRun: " +
-      captcha_status +
-      "" +
       "\n" +
-      lottery_summary
+      lottery_summary +
+      "\n" +
+      summary_1 +
+      "\n" +
+      summary_2
   );
 
-  console.log("Lottery Submitted: ", acpt_no, password);
+  console.log(
+    "抽奖已提交: ",
+    acpt_no,
+    lottery.applicationPassword ? lottery.applicationPassword : password.trim()
+  );
+
   return {
-    id: lottery.id.toString(),
     slcd,
     applicationId: acpt_no,
-    applicationPassword: password,
+    applicationPassword: lottery.applicationPassword
+      ? lottery.applicationPassword
+      : password.trim(),
     summary: lottery_summary,
   };
 };
