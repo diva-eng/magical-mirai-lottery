@@ -30,7 +30,7 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
     "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(2) > dd > p > input[type=text]:nth-child(2)",
     lottery.lastName.trim()
   );
-  if (lottery.gender == "Male") {
+  if (lottery.gender == "male") {
     await page.check(
       "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(3) > dd > p > input[type=radio]:nth-child(2)"
     );
@@ -91,7 +91,7 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
   //password
   await page.fill(
     "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(8) > dd > p:nth-child(2) > input[type=text]",
-    password.trim()
+    lottery.applicationPassword ? lottery.applicationPassword : password.trim()
   );
 
   await page.screenshot({ path: "第一页.png" });
