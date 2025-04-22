@@ -48,3 +48,14 @@ export const splitPhoneNumber = (phone) => {
 export const isEmptyOrNullString = (str) => {
   return !str || str.length === 0;
 };
+
+export const randomMouseMove = (page) => {
+  // Simulate mouse move with added randomness to simulate human behavior
+  const x = Math.floor(Math.random() * 100) + 1;
+  const y = Math.floor(Math.random() * 100) + 1;
+
+  // Simulate a mouse move event
+  page.mouse.move(x, y, {
+    steps: Math.floor(Math.random() * 10) + 1,
+  });
+};

@@ -65,7 +65,8 @@ function Show-Menu {
   Write-Host "请选择一个选项:"
   Write-Host "1. 以测试模式运行脚本"
   Write-Host "2. 以提交模式运行脚本"
-  Write-Host "3. 退出"
+  Write-Host "3. Bot防护测试"
+  Write-Host "4. 退出"
   $choice = Read-Host "输入你的选择"
   return $choice
 }
@@ -75,7 +76,8 @@ do {
   switch ($choice) {
     1 { $mode = "dryrun"; break }
     2 { $mode = "real"; break }
-    3 { Write-Output "退出中..."; exit 0 }
+    3 { $mode = "bot"; break }
+    4 { Write-Output "退出中..."; exit 0 }
     default { Write-Output "无效的选择。请重试。" }
   }
   if ($choice -in 1..3) { break }
@@ -126,6 +128,12 @@ if ($mode -eq "dryrun") {
     node index.js --dry-run --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)" --use-proxy
   } else {
     node index.js --dry-run --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
+  }
+} elseif ($mode -eq "bot") {
+  if ($proxyEnabled) {
+    node index.js --bot-test --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)" --use-proxy
+  } else {
+    node index.js --bot-test --type "$($selectedLottery.Type)" --url "$($selectedLottery.Url)"
   }
 } else {
   if ($proxyEnabled) {

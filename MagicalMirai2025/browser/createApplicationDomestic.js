@@ -1,5 +1,11 @@
 const chance = require("chance").Chance();
-const { trimSummary, splitDate, delay, splitPhoneNumber } = require("../utils");
+const {
+  trimSummary,
+  splitDate,
+  delay,
+  splitPhoneNumber,
+  randomMouseMove,
+} = require("../utils");
 const { selectShow, selectSSSeat } = require("./action");
 const { getSlcd } = require("./element");
 const { assertCurrentHeading } = require("./heading");
@@ -7,6 +13,7 @@ const { assertCurrentNavigation, getCurrentNavigation } = require("./navigate");
 
 const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   const password = chance.string({ length: 6, alpha: false, numeric: true });
+  randomMouseMove(page);
   await page.goto(link);
   await page.click(
     "#wrap > section:nth-child(7) > div:nth-child(1) > div:nth-child(2) > dl:nth-child(2) > dd:nth-child(2) > p:nth-child(1) > input:nth-child(1)"

@@ -3,6 +3,16 @@ process.env.PLAYWRIGHT_BROWSERS_PATH = 0;
 const fs = require("fs");
 const util = require("util");
 const { chromium } = require("playwright");
+// const stealth = require("playwright-extra-plugin-stealth");
+
+// chromium.use(stealth());
+
+const userAgents = [
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+];
+
 const applications = require("./applications.json");
 const { program } = require("commander");
 const {
@@ -58,6 +68,7 @@ program
   .version("0.0.1")
   .description("Fill out lottery applications")
   .option("-d, --dry-run", "Perform a dry run without actual submission")
+  .option("--bot-test", "Test the bot detection defense system")
   .option("--use-proxy", "Use a random proxy from proxies.txt")
   .option("-t, --type <type>", "Type of lottery")
   .option("-u, --url <url>", "URL of the lottery");
@@ -67,7 +78,7 @@ console.log("命令行参数:", process.argv);
 console.log("命令行参数:", program.opts());
 
 const options = program.opts();
-const { dryRun, type, url, useProxy } = options;
+const { dryRun, type, url, useProxy, botTest } = options;
 
 // url and type is required
 if (!type || !url) {
@@ -107,7 +118,9 @@ console.log = function () {
 
 console.error = console.log;
 
-async function fill_application(application, lottery_type, lottery_url, proxy) {
+async function openBrowerAndNavigate(proxy) {
+  const randomUserAgent =
+    userAgents[Math.floor(Math.random() * userAgents.length)];
   browser = await chromium.launch({
     headless: false,
     executablePath: "",
@@ -117,9 +130,26 @@ async function fill_application(application, lottery_type, lottery_url, proxy) {
         }
       : undefined,
     ignoreDefaultArgs: ["--mute-audio"],
-    args: ["--ignore-certificate-errors"],
+    args: [
+      "--ignore-certificate-errors",
+      "--disable-blink-features=AutomationControlled",
+    ],
   });
-  const page = await browser.newPage();
+  const context = await browser.newContext({
+    userAgent: randomUserAgent,
+  });
+  const page = await context.newPage();
+  await page.setViewportSize({
+    width: Math.floor(1280 + Math.random() * 100),
+    height: Math.floor(720 + Math.random() * 100),
+  });
+
+  await context.clearCookies();
+  return page;
+}
+
+async function fill_application(application, lottery_type, lottery_url, proxy) {
+  const page = await openBrowerAndNavigate(proxy);
 
   let applicationResult = null;
 
@@ -206,13 +236,19 @@ async function fill_applications(lottery_type, lottery_url) {
   }
 }
 
-fill_applications(type, url)
-  .then(() => {
-    console.log("申请填写成功");
-  })
-  .catch((error) => {
-    console.error("填写申请时出错:", error);
-  })
-  .finally(async () => {
-    await browser.close();
-  });
+// Check
+
+async function main() {
+  if (botTest) {
+    console.log("Bot test mode activated. Skipping application filling.");
+    const page = await openBrowerAndNavigate();
+    await page.goto("https://bot.sannysoft.com/", {
+      waitUntil: "domcontentloaded",
+    });
+    // process.exit(0);
+  } else {
+    await fill_applications(type, url);
+  }
+}
+
+main();
