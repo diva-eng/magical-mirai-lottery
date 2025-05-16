@@ -67,7 +67,7 @@ function askQuestion(index) {
     "gender: ": "性别: ",
     "birthDate: ": "出生日期 (格式: YYYY-MM-DD): ",
     "postalCode: ": "邮政编码 (格式: 000-0000) 有效的日本邮政编码: ",
-    "peerName: ": "同行者姓名 (海外票抽选需要 “姓 名”): ",
+    "peerName: ": "同行者姓名 (海外票抽选需要 “名 姓”): ",
     "peerPhone: ": "同行者电话 (格式: 08000000000 十一位): ",
     "piaEmail: ": "Pia电子邮件: ",
     "piaPassword: ": "Pia密码: ",
@@ -136,64 +136,79 @@ function askQuestion(index) {
   }
 }
 
-function saveApplications() {
-  async function handleMissingEmails() {
-    let emailOption = null;
-    let domain = null;
-    let baseEmail = null;
+async function handleMissingEmails() {
+  let emailOption = null;
+  let domain = null;
+  let baseEmail = null;
 
-    for (let i = 0; i < applications.length; i++) {
-      const app = applications[i];
-      if (!app.email) {
-        if (emailOption === null) {
-          console.log("检测到缺少邮箱的申请。");
-          emailOption = await new Promise((resolve) =>
-            rl.question(
-              "请选择生成邮箱的方式：1. 随机生成邮箱 2. 基于现有邮箱生成：",
-              resolve
-            )
-          );
-
-          if (emailOption === "1") {
-            domain = await new Promise((resolve) =>
-              rl.question("请输入域名（例如：miku.cx）：", resolve)
-            );
-          } else if (emailOption === "2") {
-            baseEmail = await new Promise((resolve) =>
-              rl.question("请输入基础邮箱（例如：user@gmail.com）：", resolve)
-            );
-          } else {
-            console.log("无效的选项。请再试一次。");
-            emailOption = null; // Reset to ask again
-            i--; // Retry for the same application
-            continue;
-          }
-        }
+  for (let i = 0; i < applications.length; i++) {
+    const app = applications[i];
+    if (!app.email) {
+      if (emailOption === null) {
+        console.log("检测到缺少邮箱的申请。");
+        emailOption = await new Promise((resolve) =>
+          rl.question(
+            "请选择生成邮箱的方式：1. 随机生成邮箱 2. 基于现有邮箱生成：",
+            resolve
+          )
+        );
 
         if (emailOption === "1") {
-          const randomString = Math.random().toString(36).substring(2, 9);
-          app.email = `${randomString}@${domain}`;
-          console.log(`生成的邮箱为：${app.email}`);
+          domain = await new Promise((resolve) =>
+            rl.question("请输入域名（例如：miku.cx）：", resolve)
+          );
         } else if (emailOption === "2") {
-          const [localPart, domainPart] = baseEmail.split("@");
-          app.email = `${localPart}+${i + 1}@${domainPart}`;
-          console.log(`生成的邮箱为：${app.email}`);
+          baseEmail = await new Promise((resolve) =>
+            rl.question("请输入基础邮箱（例如：user@gmail.com）：", resolve)
+          );
+        } else {
+          console.log("无效的选项。请再试一次。");
+          emailOption = null; // Reset to ask again
+          i--; // Retry for the same application
+          continue;
         }
+      }
+
+      if (emailOption === "1") {
+        const randomString = Math.random().toString(36).substring(2, 9);
+        app.email = `${randomString}@${domain}`;
+        console.log(`生成的邮箱为：${app.email}`);
+      } else if (emailOption === "2") {
+        const [localPart, domainPart] = baseEmail.split("@");
+        app.email = `${localPart}+${i + 1}@${domainPart}`;
+        console.log(`生成的邮箱为：${app.email}`);
       }
     }
   }
+}
 
-  handleMissingEmails().then(() => {
-    fs.writeFile(
-      "applications.json",
-      JSON.stringify(applications, null, 2),
-      (err) => {
-        if (err) throw err;
-        console.log("申请已保存！");
-        rl.close();
+function saveApplications() {
+  // Ask how many times the same application should be repeated
+  rl.question(
+    "请输入要重复申请的次数（例如：3）或输入0以结束：",
+    (repeatCount) => {
+      if (repeatCount > 0) {
+        const originalApplications = [...applications];
+        for (let i = 1; i < repeatCount; i++) {
+          originalApplications.forEach((app) => {
+            applications.push({ ...app });
+          });
+        }
       }
-    );
-  });
+      // Proceed to handle missing emails after the repeat count question
+      handleMissingEmails().then(() => {
+        fs.writeFile(
+          "applications.json",
+          JSON.stringify(applications, null, 2),
+          (err) => {
+            if (err) throw err;
+            console.log("申请已保存！");
+            rl.close();
+          }
+        );
+      });
+    }
+  );
 }
 
 askQuestion(0);

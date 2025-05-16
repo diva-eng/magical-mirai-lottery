@@ -14,13 +14,16 @@ const { assertCurrentNavigation, getCurrentNavigation } = require("./navigate");
 const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
   const password = chance.string({ length: 6, alpha: false, numeric: true });
   await page.goto(link);
-  const slcd = await getSlcd(page);
   await page.click("#wrap > form > section > div > input");
   await page.click("#upppd");
   await page.click("#speed_regist_enabled");
 
   await assertCurrentNavigation(page, "Application Input");
   await assertCurrentHeading(page, "Entry of your information input");
+
+  await delay(1000);
+
+  const slcd = await getSlcd(page);
 
   await page.fill(
     "#wrap > form > section:nth-child(1) > div > div.contents_body.lightpink_back > dl:nth-child(2) > dd > p > input[type=text]:nth-child(1)",
@@ -236,6 +239,15 @@ const completeOverseaLottery = async (page, lottery, link, dryRun = false) => {
   while (currentNavigation !== "Completion of Application") {
     await delay(5000);
     console.log("请在页面输入验证码");
+    // import the captcha solver if exists
+    let solveCaptchaAndSubmit = null;
+    try {
+      solveCaptchaAndSubmit = require("../captcha").solveCaptchaAndSubmit;
+      await solveCaptchaAndSubmit(page, dryRun);
+    } catch (e) {
+      console.log(e);
+      console.error("Captcha solver not found, skipping captcha solving.");
+    }
     currentNavigation = await getCurrentNavigation(page);
   }
 

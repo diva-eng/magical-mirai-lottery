@@ -25,6 +25,8 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   await assertCurrentNavigation(page, "申込入力");
   await assertCurrentHeading(page, "お客様情報入力");
 
+  await delay(1000);
+
   const slcd = await getSlcd(page);
 
   await page.fill(
@@ -245,6 +247,15 @@ const completeDomesticLottery = async (page, lottery, link, dryRun = false) => {
   while (currentNavigation !== "申込完了") {
     await delay(5000);
     console.log("请在页面输入验证码");
+    // import the captcha solver if exists
+    let solveCaptchaAndSubmit = null;
+    try {
+      solveCaptchaAndSubmit = require("../captcha").solveCaptchaAndSubmit;
+      await solveCaptchaAndSubmit(page, dryRun);
+    } catch (e) {
+      console.log(e);
+      console.error("Captcha solver not found, skipping captcha solving.");
+    }
     currentNavigation = await getCurrentNavigation(page);
   }
 

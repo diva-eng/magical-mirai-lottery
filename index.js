@@ -7,6 +7,8 @@ const { chromium } = require("playwright");
 
 // chromium.use(stealth());
 
+const APPLICATION_CHECK_URL = "https://va.pia.jp/SpLotResult.do?slcd=";
+
 const userAgents = [
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
@@ -22,6 +24,9 @@ const {
 const {
   completeOverseaLottery,
 } = require("./MagicalMirai2025/browser/createApplicationOverseas");
+const {
+  checkApplicationStatus,
+} = require("./MagicalMirai2025/browser/checkApplicationStatus");
 
 let browser = null;
 
@@ -69,6 +74,7 @@ program
   .description("Fill out lottery applications")
   .option("-d, --dry-run", "Perform a dry run without actual submission")
   .option("--bot-test", "Test the bot detection defense system")
+  .option("--check-application", "Check application status")
   .option("--use-proxy", "Use a random proxy from proxies.txt")
   .option("-t, --type <type>", "Type of lottery")
   .option("-u, --url <url>", "URL of the lottery");
@@ -78,23 +84,29 @@ console.log("命令行参数:", process.argv);
 console.log("命令行参数:", program.opts());
 
 const options = program.opts();
-const { dryRun, type, url, useProxy, botTest } = options;
+const { dryRun, type, url, useProxy, botTest, checkApplication } = options;
 
 // url and type is required
 if (!type || !url) {
-  console.error("URL and type are required.");
-  process.exit(1);
+  if (!botTest && !checkApplication) {
+    console.error("URL and type are required.");
+    process.exit(1);
+  }
 }
 
 const lotteryUrlRegex =
   /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i;
-if (!lotteryUrlRegex.test(url)) {
-  console.error("Invalid URL format.");
-  process.exit(1);
-}
-if (!["domestic", "overseas"].includes(type)) {
-  console.error("Invalid lottery type. Must be 'domestic' or 'overseas'.");
-  process.exit(1);
+
+if (!botTest && !checkApplication) {
+  if (!lotteryUrlRegex.test(url)) {
+    console.error("Invalid URL format.");
+    process.exit(1);
+  }
+
+  if (!["domestic", "overseas"].includes(type)) {
+    console.error("Invalid lottery type. Must be 'domestic' or 'overseas'.");
+    process.exit(1);
+  }
 }
 
 console.log("抽奖类型:", type);
@@ -214,8 +226,8 @@ async function fill_applications(lottery_type, lottery_url) {
   resultFile.close();
   // Iterate over each application and fill it
   for (const application of applications) {
-    const { firstName, lastName, email } = application;
-    console.log(`正在填写申请 ${lastName} ${firstName}, ${email}`);
+    const { firstName, lastName, email, showNo } = application;
+    console.log(`正在填写申请 ${lastName} ${firstName}, ${email}, ${showNo}`);
     const result = await fill_application(
       application,
       lottery_type,
@@ -246,9 +258,187 @@ async function main() {
       waitUntil: "domcontentloaded",
     });
     // process.exit(0);
+  } else if (checkApplication) {
+    // Get all the result folders with results- prefix
+    const resultFolders = fs
+      .readdirSync(".")
+      .filter(
+        (file) => file.startsWith("results-") && fs.statSync(file).isDirectory()
+      );
+    const resultFiles = [];
+    for (const folder of resultFolders) {
+      const files = fs
+        .readdirSync(folder)
+        .filter((file) => file.endsWith(".csv"));
+      if (files.length > 0) {
+        resultFiles.push({
+          folder: folder,
+          file: files[0],
+        });
+      }
+    }
+    console.log("结果文件:", resultFiles);
+
+    const allResults = [];
+
+    // Load all result files csv content
+    for (const resultFile of resultFiles) {
+      const filePath = `${resultFile.folder}/${resultFile.file}`;
+      const content = fs.readFileSync(filePath, "utf-8");
+      const lines = content.split("\n").slice(1); // Skip header
+      for (const line of lines) {
+        if (!line.trim()) continue; // Skip empty lines
+        const [
+          firstName,
+          lastName,
+          email,
+          applicationId,
+          applicationPassword,
+          slcd,
+          summary,
+        ] = line.split(",");
+
+        allResults.push({
+          firstName,
+          lastName,
+          email,
+          applicationId,
+          applicationPassword,
+          slcd,
+          summary,
+        });
+      }
+    }
+    // Group by slcd
+    const groupedResults = allResults.reduce((acc, result) => {
+      if (!acc[result.slcd]) {
+        acc[result.slcd] = [];
+      }
+      acc[result.slcd].push(result);
+      return acc;
+    }, {});
+
+    // Output count for each slcd and total count
+    const slcdCounts = Object.keys(groupedResults).map((slcd) => {
+      return {
+        slcd: slcd,
+        count: groupedResults[slcd].length,
+      };
+    });
+    const totalCount = allResults.length;
+    console.log(
+      "每个slcd的申请数量:",
+      slcdCounts.map(({ slcd, count }) => `${slcd}: ${count}`).join(", ")
+    );
+    console.log("总申请数量:", totalCount);
+
+    // Ask user to confirm before checking application status
+    const confirm = await new Promise((resolve) => {
+      process.stdout.write("是否继续检查申请状态？(y/n): ");
+      process.stdin.once("data", (data) => resolve(data.toString().trim()));
+    });
+
+    if (confirm.toLowerCase() !== "y") {
+      console.log("用户取消检查申请状态。");
+      if (browser) {
+        await browser.close();
+      }
+      return;
+    }
+
+    const applicationResults = [];
+
+    // Check each slcd
+    for (const slcd of Object.keys(groupedResults)) {
+      const results = groupedResults[slcd];
+      // Check each application status
+      for (const result of results) {
+        const { firstName, lastName, email, applicationId } = result;
+        console.log(
+          `正在检查申请 ${lastName} ${firstName}, ${email}, ${applicationId}, ${slcd} 的状态...`
+        );
+        const page = await openBrowerAndNavigate(undefined);
+        const applicationResult = await checkApplicationStatus(
+          page,
+          result,
+          APPLICATION_CHECK_URL + slcd
+        );
+        console.log("申请结果:", applicationResult);
+        applicationResults.push(applicationResult);
+        page.close();
+      }
+    }
+
+    // Group by application status, and count
+    const applicationStatusCounts = applicationResults.reduce((acc, result) => {
+      if (!acc[result.applicationStatus]) {
+        acc[result.applicationStatus] = 0;
+      }
+      acc[result.applicationStatus]++;
+      return acc;
+    }, {});
+    console.log(
+      "每个申请状态的数量:",
+      Object.keys(applicationStatusCounts)
+        .map((status) => `${status}: ${applicationStatusCounts[status]}`)
+        .join(", ")
+    );
+
+    // Calculate percentage for each status
+    const applicationStatusPercentages = Object.keys(
+      applicationStatusCounts
+    ).map((status) => {
+      return {
+        status: status,
+        percentage: (
+          (applicationStatusCounts[status] / totalCount) *
+          100
+        ).toFixed(2),
+      };
+    });
+
+    // Get the won application
+    const wonApplications = applicationResults.filter(
+      (result) => result.applicationStatus === "won"
+    );
+
+    // Output the won applications in file
+    const wonFileName = `won-applications.csv`;
+    const wonFile = fs.createWriteStream(wonFileName);
+    wonFile.write(
+      "\ufeff" +
+        "firstName,lastName,email,applicationId,applicationPassword,slcd,summary\n"
+    );
+    wonFile.close();
+    for (const application of wonApplications) {
+      const { firstName, lastName, email, applicationId, applicationPassword } =
+        application;
+      const resultFile = fs.createWriteStream(wonFileName, { flags: "a" });
+      resultFile.write(
+        `${firstName},${lastName},${email},${applicationId},${applicationPassword},${application.slcd},"${application.summary}"\n`
+      );
+      resultFile.close();
+      console.log(
+        `中奖申请已保存 ${lastName} ${firstName}, ${email}. 摘要: ${application.summary}`
+      );
+    }
+
+    console.log(
+      "每个申请状态的百分比:",
+      applicationStatusPercentages
+        .map(({ status, percentage }) => `${status}: ${percentage}%`)
+        .join(", ")
+    );
   } else {
     await fill_applications(type, url);
+    console.log("所有申请已填写完毕。请检查结果文件。");
+    if (browser) {
+      await browser.close();
+    }
   }
 }
 
-main();
+main().then(() => {
+  console.log("所有操作已完成。");
+  process.exit(0);
+});

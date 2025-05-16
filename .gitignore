@@ -11,3 +11,5 @@ coverage/
 *.log
 *.tsbuildinfo
 results-*
+captcha/
+captcha.json
