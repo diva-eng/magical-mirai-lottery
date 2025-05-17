@@ -364,7 +364,10 @@ async function main() {
           APPLICATION_CHECK_URL + slcd
         );
         console.log("申请结果:", applicationResult);
-        applicationResults.push(applicationResult);
+        applicationResults.push({
+          ...result,
+          ...applicationResult,
+        });
         page.close();
       }
     }
@@ -402,25 +405,38 @@ async function main() {
       (result) => result.applicationStatus === "won"
     );
 
-    // Output the won applications in file
-    const wonFileName = `won-applications.csv`;
-    const wonFile = fs.createWriteStream(wonFileName);
-    wonFile.write(
+    const wonFileName = `${new Date()
+      .toISOString()
+      .replace(/[:]/g, "_")}-won-applications.csv`;
+
+    const wonFileContent = [
       "\ufeff" +
-        "firstName,lastName,email,applicationId,applicationPassword,slcd,summary\n"
-    );
-    wonFile.close();
-    for (const application of wonApplications) {
-      const { firstName, lastName, email, applicationId, applicationPassword } =
-        application;
-      const resultFile = fs.createWriteStream(wonFileName, { flags: "a" });
-      resultFile.write(
-        `${firstName},${lastName},${email},${applicationId},${applicationPassword},${application.slcd},"${application.summary}"\n`
-      );
-      resultFile.close();
-      console.log(
-        `中奖申请已保存 ${lastName} ${firstName}, ${email}. 摘要: ${application.summary}`
-      );
+        "firstName,lastName,email,applicationId,applicationPassword,slcd,summary\n",
+    ];
+
+    // Prepare the won applications content
+    if (wonApplications.length > 0) {
+      for (const application of wonApplications) {
+        const {
+          firstName,
+          lastName,
+          email,
+          applicationId,
+          applicationPassword,
+        } = application;
+        wonFileContent.push(
+          `${firstName},${lastName},${email},${applicationId},${applicationPassword},${application.slcd},"${application.summary}"\n`
+        );
+        console.log(
+          `中奖申请已保存 ${lastName} ${firstName}, ${email}. 摘要: ${application.summary}`
+        );
+      }
+
+      // Write the content to the file using fs.promises
+      await fs.promises.writeFile(wonFileName, wonFileContent.join(""));
+      console.log(`中奖申请已保存到文件: ${wonFileName}`);
+    } else {
+      console.log("没有中奖的申请。");
     }
 
     console.log(
@@ -440,5 +456,8 @@ async function main() {
 
 main().then(() => {
   console.log("所有操作已完成。");
+  if (browser) {
+    browser.close();
+  }
   process.exit(0);
 });

@@ -23,7 +23,16 @@ const checkApplicationStatus = async (page, body, link) => {
 
   await page.waitForSelector("#wrap > section:nth-child(5) > div:nth-child(1)");
 
-  const applicationResult = await getResult(page);
+  let applicationResult = null;
+
+  while (!applicationResult) {
+    try {
+      applicationResult = await getResult(page);
+    } catch (error) {
+      console.error("Error fetching application result, retrying...", error);
+      await delay(2000); // Wait before retrying
+    }
+  }
 
   let applicationStatus = ApplicationStatus.ACCEPTED;
 

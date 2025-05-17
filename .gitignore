@@ -13,3 +13,5 @@ coverage/
 results-*
 captcha/
 captcha.json
+*.zip
+*.csv

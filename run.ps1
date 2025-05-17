@@ -53,6 +53,7 @@ if ($LASTEXITCODE -ne 0) {
 $lotteryUrls = @(
   @{ Name = "オフィシャルWEB抽選先行（一次受付）"; Url = "http://pia.jp/v/magicalmirai25-1/"; Date = "2025年3月14日(金) 12:00 ～ 3月31日(月) 23:59"; Type = "domestic" },
   @{ Name = "オフィシャルWEB抽選先行（二次受付）"; Url = "http://pia.jp/v/magicalmirai25-2/"; Date = "2025年4月18日(金) 12:00 ～ 5月12日(月) 23:59" ; Type = "domestic" },
+  @{ Name = "チケットぴあ 特別先行"; Url = "http://pia.jp/piajp/v/magicalmirai25-p2/"; Date = "2025年05月16日(金) 昼12:00 ～ 2025年06月02日(月) 23:59" ; Type = "domestic" },
   @{ Name = "Advance lottery reservation from website"; Url = "http://pia.jp/v/magicalmirai25-1en/"; Date = "April 18th (Fri.) 2025, 12:00 JST - May 12th (Mon.) 2025, 23:59 JST" ; Type = "overseas" },
   @{ Name = "Advance lottery reservation from website"; Url = "http://pia.jp/v/magicalmirai25-2en/"; Date = "May 16th (Fri.) 2025, 12:00 JST - June 2nd (Mon.) 2025, 23:59 JST"; Type = "overseas" }
 )
