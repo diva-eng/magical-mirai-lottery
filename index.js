@@ -19,14 +19,14 @@ const applications = require("./applications.json");
 const { program } = require("commander");
 const {
   completeDomesticLottery,
-} = require("./MagicalMirai2025/browser/createApplicationDomestic");
+} = require("./MagicalMirai2026/browser/createApplicationDomestic");
 
 const {
   completeOverseaLottery,
-} = require("./MagicalMirai2025/browser/createApplicationOverseas");
+} = require("./MagicalMirai2026/browser/createApplicationOverseas");
 const {
   checkApplicationStatus,
-} = require("./MagicalMirai2025/browser/checkApplicationStatus");
+} = require("./MagicalMirai2026/browser/checkApplicationStatus");
 
 let browser = null;
 
